@@ -5,14 +5,16 @@ module Blackjack
       def self.decide(actions, player, showing)
         return actions.first if actions.length == 1
 
-        if actions.include? Blackjack::Brain::Actions::HIT
-          puts "#{player.name} - HIT"
-          return Blackjack::Brain::Actions::HIT if should_hit?(player, showing)
+        if actions.include? Blackjack::Actions::HIT
+
+          if should_hit?(player, showing)
+            puts "#{player.name} hit!"
+            return Blackjack::Actions::HIT
+          end
         end
 
-        if actions.include? Blackjack::Brain::Actions::STAND
-          puts "#{player.name} - STAND"
-          return Blackjack::Brain::Actions::STAND
+        if actions.include? Blackjack::Actions::STAND
+          return Blackjack::Actions::STAND
         end
 
         raise "Oops! Could not decide."

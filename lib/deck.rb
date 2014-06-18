@@ -36,7 +36,11 @@ class Deck
     build_deck
   end
 
-  def card
+  def burn_card
+    next_card
+  end
+
+  def next_card
     raise 'Empty deck -- needs to be shuffled' if @cards.size == 0
     @cards.delete_at Random.rand(@cards.size)
   end

@@ -25,7 +25,7 @@ class Card
   end
 
   def to_s
-    "#{@value} #{@suit}"
+    "#{@value}#{@suit[0]}"
   end
 
 end
