@@ -1,29 +1,10 @@
 # Blackjack::Sim
 
-TODO: Write a gem description
-
-## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'blackjack-sim'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install blackjack-sim
+Simple blackjack simulator to deal hands, and a simple rule set to decide whether or not to hit based on the dealer's show card.
 
 ## Usage
 
-TODO: Write usage instructions here
+ruby run.rb [number_of_decks] [number_of_iterations]
 
-## Contributing
-
-1. Fork it ( https://github.com/[my-github-username]/blackjack-sim/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+## Copywrite
+Copywrite 2014 - All rights reserved - @mgbatchelor
