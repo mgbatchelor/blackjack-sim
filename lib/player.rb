@@ -1,13 +1,38 @@
 class Player
 
-  attr_reader :cards, :name, :stats
-  attr_accessor :state
+  attr_reader :cards, :name, :stats, :balance
+  attr_accessor :state, :bet
 
   def initialize(name, brain)
     @name = name
     @brain = brain
     @stats = Hash.new() { |hash, key| hash[key] = Hash.new(0) }
+    @balance = 0
+    @bet = 0
     clear
+  end
+
+  def bet!
+    bet = 10
+    puts "#{name} bet #{bet}"
+    @bet = deduct(bet)
+  end
+
+  def set_balance(amount)
+    @balance = amount
+  end
+
+  def add(amount)
+    @balance += amount
+  end
+
+  def deduct(amount)
+    @balance -= amount
+    amount
+  end
+
+  def double_down
+    @bet += deduct(@bet)
   end
 
   def record(result)
@@ -15,8 +40,15 @@ class Player
     @stats["counts"]["played"] += 1
   end
 
+  def has_blackjack?
+    @cards.size == 2 && value == 21
+  end
+
   def check_for_blackjack
-    @stats["counts"]["blackjack"] += 1 if @cards.size == 2 && value == 21
+    if has_blackjack?
+      @stats["counts"]["blackjack"] += 1
+      puts "#{name} BLACKJACK!"
+    end
   end
 
   def deal_card(card)
@@ -29,6 +61,10 @@ class Player
     @brain.decide(actions, self, showing)
   end
 
+  def card_count
+    @cards.size
+  end
+
   def value
     @cards.inject(0) do |total, card|
       total += card.face_value(total)
@@ -37,7 +73,7 @@ class Player
 
   def to_s
     cards = @cards.map(&:to_s).join(",")
-    "#{name} #{cards} (#{value})"
+    "#{balance} #{name} #{cards} (#{value})"
   end
 
   def set_state(state)

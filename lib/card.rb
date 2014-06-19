@@ -15,8 +15,8 @@ class Card
     @value == 'A'
   end
 
-  def at_least?(value)
-    @face_value >= value
+  def card_value
+    @face_value
   end
 
   def face_value(hand_value)

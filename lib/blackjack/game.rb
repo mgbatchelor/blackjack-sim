@@ -26,17 +26,13 @@ module Blackjack
     end
 
     def join(player)
+      player.set_balance(10000)
       @players << player
     end
 
-    def deal!
-      prep_new_deal
-      2.times do
-        @players.each do |player|
-          player.deal_card @deck.next_card
-        end
-        @dealer.deal_card @deck.next_card
-      end
+    def start!
+      bet!
+      deal!
       puts @dealer
       play!
       play_dealer!
@@ -45,6 +41,22 @@ module Blackjack
     end
 
     private
+
+      def bet!
+        @players.each do |player|
+          player.bet!
+        end
+      end
+
+      def deal!
+        prep_new_deal
+        2.times do
+          @players.each do |player|
+            player.deal_card @deck.next_card
+          end
+          @dealer.deal_card @deck.next_card
+        end
+      end
 
       def prep_new_deal
         @deck.shuffle if @hands >= 6 || @number_of_decks == 1
@@ -66,9 +78,13 @@ module Blackjack
       end
 
       def play_dealer!
-        while @dealer.should_hit?
-          @dealer.deal_card @deck.next_card
-          puts @dealer.to_s(false)
+        if @dealer.has_21?
+          puts "Dealer BLACKJACK!"
+        else
+          while @dealer.should_hit?
+            @dealer.deal_card @deck.next_card
+            puts @dealer.to_s(false)
+          end
         end
       end
 
@@ -83,11 +99,20 @@ module Blackjack
 
       def check_hand(player)
         if player.value <= 21
-          if (player.value > @dealer.value || @dealer.value > 21)
-            puts "#{player.name} - WIN - #{player.value}"
+          if (player.value > @dealer.value || @dealer.value > 21 || player.has_blackjack?)
+            if player.has_blackjack?
+              amount = 2.5*player.bet
+              puts "#{player.name} - BLACKJACK (#{amount}) - #{player.value}"
+              player.add amount
+            else
+              amount = 2*player.bet
+              puts "#{player.name} - WIN (#{amount}) - #{player.value}"
+              player.add amount
+            end
             return :win
           elsif player.value == @dealer.value
             puts "#{player.name} - PUSH - #{player.value}"
+            player.add player.bet
             return :push
           else ## losing hand
             puts "#{player.name} - LOSE - #{player.value}"
@@ -97,11 +122,19 @@ module Blackjack
           puts "#{player.name} - LOSE - #{player.value}"
           return :lose
         end
+        player.bet = 0
       end
 
       def perform_action(player, action)
         if get_actions(player).include? action
           case action
+          when Blackjack::Actions::DOUBLE_DOWN
+            player.deal_card @deck.next_card
+            if player.value > 21
+              player.set_state(Blackjack::States::BUSTED)
+            else
+              player.set_state(Blackjack::States::DOUBLED_DOWN)
+            end
           when Blackjack::Actions::STAND
             player.set_state(Blackjack::States::STANDING)
           when Blackjack::Actions::HIT
@@ -114,8 +147,11 @@ module Blackjack
       end
 
       def get_actions(player)
-        return [] if [Blackjack::States::STANDING, Blackjack::States::BUSTED].include?(player.state)
+        return [] if [Blackjack::States::DOUBLED_DOWN, Blackjack::States::STANDING, Blackjack::States::BUSTED].include?(player.state)
         actions = [Blackjack::Actions::STAND]
+        if player.card_count == 2
+          actions << Blackjack::Actions::DOUBLE_DOWN
+        end
         if player.value < 21 && !@dealer.has_21?
           actions << Blackjack::Actions::HIT
         end

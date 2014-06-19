@@ -18,7 +18,7 @@ module Blackjack
 
     def simulate(count)
       count.times do
-        @game.deal!
+        @game.start!
       end
       @game.print_stats
     end
