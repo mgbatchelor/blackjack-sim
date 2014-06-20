@@ -1,10 +1,9 @@
-require "./lib/blackjack/brain/automatic_decision"
-require "./lib/blackjack/brain/manual_decision"
 require "./lib/blackjack/game"
 
-module Blackjack
+require_relative "./brain/automatic_decision"
+require_relative "./brain/simple_betting_strategy"
 
-  BRAIN = Blackjack::Brain::AutomaticDecision
+module Blackjack
 
   class Sim
 
@@ -13,7 +12,12 @@ module Blackjack
     end
 
     def join(name)
-      @game.join(Player.new(name, Blackjack::BRAIN))
+      player = Player.new(
+                name,
+                Blackjack::Brain::AutomaticDecision.new,
+                Blackjack::Brain::SimpleBettingStrategy.new
+              )
+      @game.join(player)
     end
 
     def simulate(count)

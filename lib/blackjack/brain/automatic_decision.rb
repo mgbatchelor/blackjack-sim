@@ -1,8 +1,8 @@
 module Blackjack
   module Brain
-    module AutomaticDecision
+    class AutomaticDecision
 
-      def self.decide(actions, hand, showing)
+      def decide(actions, hand, showing)
         return actions.first if actions.length == 1
 
         if actions.include?(Blackjack::Actions::SPLIT)
@@ -32,34 +32,34 @@ module Blackjack
         raise "Oops! Could not decide."
       end
 
-      def self.should_hit?(hand, showing)
+      def should_hit?(hand, showing)
         return true if hand <= 11
         return true if hand == 12 && (showing == 2 || showing == 3)
         return true if hand < 17 && showing >= 7
         return false
       end
 
-      def self.should_soft_hit?(hand, showing)
+      def should_soft_hit?(hand, showing)
         return true if hand <= 17
         return true if hand <= 18 && showing >= 9
         return false
       end
 
-      def self.should_double_down?(hand, showing)
+      def should_double_down?(hand, showing)
         return true if hand == 11 && showing <= 10
         return true if hand == 10 && showing <= 9
         return true if hand == 9 && (showing >= 3 && showing <= 6)
         return false
       end
 
-      def self.should_soft_double_down?(hand, showing)
+      def should_soft_double_down?(hand, showing)
         return true if hand <= 18 && (showing == 6 || showing == 5)
         return true if hand <= 18 && hand >= 15 && showing == 4
         return true if hand <= 18 && hand >= 17 && showing == 3
         return false
       end
 
-      def self.should_split?(split_card, showing)
+      def should_split?(split_card, showing)
         return true if split_card.is_ace?
         return true if split_card.face_value == 9 && showing <= 9 && showing != 7
         return true if split_card.face_value == 8

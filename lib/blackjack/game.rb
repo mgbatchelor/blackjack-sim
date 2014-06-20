@@ -1,6 +1,4 @@
 require_relative "./actions"
-require_relative "./brain/automatic_decision"
-require_relative "./brain/manual_decision"
 require_relative "./states"
 require_relative "../dealer"
 require_relative "../deck"
@@ -115,24 +113,24 @@ module Blackjack
           if (hand.value > @dealer.value || @dealer.value > 21 || hand.has_blackjack?)
             if hand.has_blackjack?
               amount = 2.5 * hand.bet
-              puts "*BLACKJACK* #{hand} - #{hand.value}"
+              puts "*BLACKJACK* #{hand} - #{amount}"
               player.add amount
             else
               amount = 2 * hand.bet
-              puts "*WON* #{hand} - #{hand.value}"
+              puts "*WON* #{hand} - #{amount}"
               player.add amount
             end
             return :win
           elsif hand.value == @dealer.value
-            puts "*PUSHED* #{player.name} #{hand.value}"
+            puts "*PUSHED* #{hand}"
             player.add hand.bet
             return :push
           else ## losing hand
-            puts "*LOST* #{hand} #{hand.value}"
+            puts "*LOST* #{hand}"
             return :lose
           end
         else ## bust
-          puts "*LOST* #{hand} #{hand.value}"
+          puts "*LOST* #{hand}"
           return :lose
         end
       end

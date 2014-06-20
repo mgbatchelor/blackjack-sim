@@ -5,16 +5,19 @@ class Player
   attr_reader :cards, :name, :stats, :balance, :hands
   attr_accessor :state
 
-  def initialize(name, brain)
+  def initialize(name, brain, betting_strategy)
     @name = name
     @brain = brain
+    @betting_strategy = betting_strategy
     @hands = []
     @stats = Hash.new() { |hash, key| hash[key] = Hash.new(0) }
     @balance = 0
   end
 
   def get_bet
-    deduct(10)
+    bet = @betting_strategy.calculate_bet
+    puts "#{name} bet #{bet}"
+    deduct(bet)
   end
 
   def split(card, bet)
