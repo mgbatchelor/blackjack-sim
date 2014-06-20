@@ -2,22 +2,26 @@ require_relative './hand'
 
 class Player
 
-  attr_reader :cards, :name, :stats, :balance, :hand
-  attr_accessor :state, :bet
+  attr_reader :cards, :name, :stats, :balance, :hands
+  attr_accessor :state
 
   def initialize(name, brain)
     @name = name
     @brain = brain
-    @hand = Hand.new(self)
+    @hands = []
     @stats = Hash.new() { |hash, key| hash[key] = Hash.new(0) }
     @balance = 0
-    @bet = 0
   end
 
-  def bet!
-    bet = 10
-    puts "#{name} bet #{bet}"
-    @bet = deduct(bet)
+  def get_bet
+    deduct(10)
+  end
+
+  def split(card, bet)
+    hand = Hand.new(@hands.size + 1, self)
+    hand.set_bet deduct(bet)
+    hand.deal_card card
+    @hands << hand
   end
 
   def set_balance(amount)
@@ -30,11 +34,7 @@ class Player
 
   def deduct(amount)
     @balance -= amount
-    amount
-  end
-
-  def double_down
-    @bet += deduct(@bet)
+    return amount
   end
 
   def record(result)
@@ -44,6 +44,14 @@ class Player
 
   def choose_action(actions, hand, showing)
     @brain.decide(actions, hand, showing)
+  end
+
+  def number_of_hands
+    @hands.size
+  end
+
+  def clear_hands
+    @hands = [ Hand.new(1, self) ]
   end
 
   def to_s

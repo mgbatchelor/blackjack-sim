@@ -19,7 +19,7 @@ module Blackjack
     end
 
     def print_stats
-      puts "Dealer: #{@dealer.stats}"
+      @dealer.print_stats
       @players.each do |player|
         puts "#{player.name} #{player.stats}"
       end
@@ -44,7 +44,10 @@ module Blackjack
 
       def bet!
         @players.each do |player|
-          player.bet!
+          player.clear_hands
+          player.hands.each do |hand|
+            hand.bet!
+          end
         end
       end
 
@@ -52,8 +55,9 @@ module Blackjack
         prep_new_deal
         2.times do
           @players.each do |player|
-            hand = player.hand
-            hand.deal_card @deck.next_card
+            player.hands.each do |hand|
+              hand.deal_card @deck.next_card
+            end
           end
           @dealer.deal_card @deck.next_card
         end
@@ -63,8 +67,9 @@ module Blackjack
         @deck.shuffle if @rounds >= 6 || @number_of_decks == 1
         @rounds += 1
         @players.each do |player|
-          hand = player.hand
-          hand.clear
+          player.hands.each do |hand|
+            hand.clear
+          end
         end
         @dealer.clear
         @deck.burn_card
@@ -73,12 +78,12 @@ module Blackjack
       def play!
         @players.each do |player|
           puts "#{player} turn."
-          hand = player.hand
-          puts hand
-
-          while !(actions = get_actions(hand)).empty?
-            action = player.choose_action(actions, hand, @dealer.showing_card)
-            perform_action(player, hand, action)
+          player.hands.each do |hand|
+            puts hand
+            while !(actions = get_actions(player, hand)).empty?
+              action = player.choose_action(actions, hand, @dealer.showing_card)
+              perform_action(player, hand, action)
+            end
           end
         end
       end
@@ -99,9 +104,9 @@ module Blackjack
         @dealer.record @dealer.value
 
         @players.each do |player|
-          hand = player.hand
-
-          player.record(check_hand(player, hand))
+          player.hands.each do |hand|
+            player.record(check_hand(player, hand))
+          end
         end
       end
 
@@ -109,35 +114,34 @@ module Blackjack
         if hand.value <= 21
           if (hand.value > @dealer.value || @dealer.value > 21 || hand.has_blackjack?)
             if hand.has_blackjack?
-              amount = 2.5 * player.bet
-              puts "#{player.name} - BLACKJACK (#{amount}) - #{hand.value}"
+              amount = 2.5 * hand.bet
+              puts "*BLACKJACK* #{hand} - #{hand.value}"
               player.add amount
             else
-              amount = 2 * player.bet
-              puts "#{player.name} - WIN (#{amount}) - #{hand.value}"
+              amount = 2 * hand.bet
+              puts "*WON* #{hand} - #{hand.value}"
               player.add amount
             end
             return :win
           elsif hand.value == @dealer.value
-            puts "#{player.name} - PUSH - #{hand.value}"
-            player.add player.bet
+            puts "*PUSHED* #{player.name} #{hand.value}"
+            player.add hand.bet
             return :push
           else ## losing hand
-            puts "#{player.name} - LOSE - #{hand.value}"
+            puts "*LOST* #{hand} #{hand.value}"
             return :lose
           end
         else ## bust
-          puts "#{player.name} - LOSE - #{hand.value}"
+          puts "*LOST* #{hand} #{hand.value}"
           return :lose
         end
-        player.bet = 0
       end
 
       def perform_action(player, hand, action)
-        if get_actions(hand).include? action
+        if get_actions(player, hand).include? action
           case action
           when Blackjack::Actions::DOUBLE_DOWN
-            player.double_down
+            hand.double_down!
             hand.deal_card @deck.next_card
             if hand.value > 21
               hand.set_state(Blackjack::States::BUSTED)
@@ -149,17 +153,30 @@ module Blackjack
           when Blackjack::Actions::HIT
             hand.deal_card @deck.next_card
             hand.set_state(Blackjack::States::BUSTED) if hand.value > 21
+          when Blackjack::Actions::SPLIT
+            hand.split!
+            puts hand.player.hands
+            hand.player.hands.each do |split_hand|
+              split_hand.set_state(Blackjack::States::SPLIT)
+              split_hand.deal_card @deck.next_card if split_hand.card_count == 1
+              split_hand.set_state(Blackjack::States::STANDING) if split_hand.split_aces?
+            end
+          else
+            raise "Invalid action"
           end
         else
           raise "Invalid action"
         end
       end
 
-      def get_actions(hand)
+      def get_actions(player, hand)
         return [] if [Blackjack::States::DOUBLED_DOWN, Blackjack::States::STANDING, Blackjack::States::BUSTED].include?(hand.state)
         actions = [Blackjack::Actions::STAND]
         if hand.card_count == 2
           actions << Blackjack::Actions::DOUBLE_DOWN
+        end
+        if hand.same_value? && player.number_of_hands < 4
+          actions << Blackjack::Actions::SPLIT
         end
         if hand.value < 21 && !@dealer.has_21?
           actions << Blackjack::Actions::HIT

@@ -1,14 +1,43 @@
 class Hand
 
-  attr_reader :cards
+  attr_reader :cards, :bet, :player
   attr_accessor :state
 
-  def initialize(player)
+  def initialize(id, player)
+    @id = id
     @player = player
+    @cards = []
+    @bet = 0
   end
 
   def name
     @player.name
+  end
+
+  def set_bet(bet)
+    @bet = bet
+  end
+
+  def bet!
+    @bet = @player.get_bet
+  end
+
+  def double_down!
+    @bet += @player.deduct(@bet)
+  end
+
+  def split!
+    puts "SPLIT ACES" if @cards.size == 2 && (@cards[0].is_ace? && @cards[1].is_ace?)
+
+    @player.split(@cards.pop, @bet)
+  end
+
+  def split_aces?
+    @state === Blackjack::States::SPLIT && @cards[0].is_ace?
+  end
+
+  def same_value?
+    @cards.size == 2 && (@cards[0].face_value == @cards[1].face_value)
   end
 
   def has_blackjack?
@@ -20,7 +49,7 @@ class Hand
   end
 
   def set_state(state)
-    puts "#{@player.name} is #{state} with #{value}."
+    puts "#{@player.name} - hand #{@id} - is #{state} with #{value}."
     @state = state
   end
 
@@ -48,13 +77,13 @@ class Hand
   def check_for_blackjack
     if has_blackjack?
       @player.stats["counts"]["blackjack"] += 1
-      puts "#{@player.name} BLACKJACK!"
+      puts "#{@player.name} - hand #{@id} - BLACKJACK!"
     end
   end
 
   def to_s
     cards = @cards.map(&:to_s).join(",")
-    "#{@player.name} > #{cards} (#{value})"
+    "#{@player.name} - hand #{@id} - #{cards} (#{value})"
   end
 
 end
