@@ -44,6 +44,10 @@ class Player
     @cards.size == 2 && value == 21
   end
 
+  def has_soft_ace?
+    @cards.size == 2 && (@cards[0].is_ace? || @cards[1].is_ace?)
+  end
+
   def check_for_blackjack
     if has_blackjack?
       @stats["counts"]["blackjack"] += 1
