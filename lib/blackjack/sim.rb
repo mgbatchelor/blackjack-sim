@@ -1,7 +1,7 @@
 require "./lib/blackjack/game"
 
 require_relative "./brain/automatic_decision"
-require_relative "./brain/simple_betting_strategy"
+require_relative "./brain/random_betting_strategy"
 
 module Blackjack
 
@@ -15,7 +15,7 @@ module Blackjack
       player = Player.new(
                 name,
                 Blackjack::Brain::AutomaticDecision.new,
-                Blackjack::Brain::SimpleBettingStrategy.new
+                Blackjack::Brain::RandomBettingStrategy.new
               )
       @game.join(player)
     end

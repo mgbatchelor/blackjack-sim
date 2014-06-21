@@ -61,5 +61,13 @@ class Player
     "#{balance} - #{name}"
   end
 
+  def print_stats
+    puts "#{name} >> #{balance} <<"
+    total = @stats["counts"]["played"]
+    @stats["total"].each do |key, stat|
+      percent = 100 * (stat / total.to_f)
+      puts ">> #{key} >> #{percent}%"
+    end
+  end
 
 end

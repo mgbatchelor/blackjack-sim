@@ -19,7 +19,7 @@ module Blackjack
     def print_stats
       @dealer.print_stats
       @players.each do |player|
-        puts "#{player.name} #{player.stats}"
+        player.print_stats
       end
     end
 
@@ -130,8 +130,8 @@ module Blackjack
             return :lose
           end
         else ## bust
-          puts "*LOST* #{hand}"
-          return :lose
+          puts "*BUST* #{hand}"
+          return :bust
         end
       end
 
