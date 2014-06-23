@@ -19,8 +19,16 @@ class Card
     @face_value
   end
 
-  def face_value(hand_value = 0)
-    return (hand_value + @face_value > 21) ? 1 : @face_value if is_ace?
+  def face_value(hand_value = 0, last_card = false)
+    if is_ace?
+      if !last_card && (hand_value + @face_value) == 21
+        return 1
+      elsif (hand_value + @face_value) > 21
+        return 1
+      else
+        @face_value
+      end
+    end
     return @face_value
   end
 

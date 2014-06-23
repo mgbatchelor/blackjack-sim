@@ -16,7 +16,7 @@ class Dealer
   end
 
   def deal_card(card)
-    @stats[:showing][card.value] += 1 if @cards.empty?
+    @stats[:showing][card.value] += 1 if @cards.size == 1
     @cards << card
   end
 
@@ -39,8 +39,10 @@ class Dealer
   end
 
   def value
-    @cards.inject(0) do |total, card|
-      total += card.face_value(total)
+    @cards.sort_by(&:card_value).each_with_index.inject(0) do |total, pair|
+      card, index = pair
+      last_card = index == @cards.count - 1
+      total += card.face_value(total, last_card)
     end
   end
 

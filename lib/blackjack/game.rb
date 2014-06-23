@@ -24,11 +24,11 @@ module Blackjack
     end
 
     def join(player)
-      player.set_balance(10000)
       @players << player
     end
 
     def start!
+      prep_new_deal
       bet!
       deal!
       puts @dealer
@@ -42,7 +42,6 @@ module Blackjack
 
       def bet!
         @players.each do |player|
-          player.clear_hands
           player.hands.each do |hand|
             hand.bet!
           end
@@ -50,7 +49,6 @@ module Blackjack
       end
 
       def deal!
-        prep_new_deal
         2.times do
           @players.each do |player|
             player.hands.each do |hand|
@@ -65,9 +63,7 @@ module Blackjack
         @deck.shuffle if @rounds >= 6 || @number_of_decks == 1
         @rounds += 1
         @players.each do |player|
-          player.hands.each do |hand|
-            hand.clear
-          end
+          player.clear_hands
         end
         @dealer.clear
         @deck.burn_card

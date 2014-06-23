@@ -42,16 +42,17 @@ class Deck
 
   def next_card
     raise 'Empty deck -- needs to be shuffled' if @cards.size == 0
-    @cards.delete_at Random.rand(@cards.size)
+    @cards.shift
   end
 
   def shuffle
     build_deck
+    @cards = @cards.shuffle
   end
 
   def print_debug
     puts "Decks: #{@number_of_decks} - Cards: #{@cards.length}"
-    puts @cards.each_with_object(Hash.new(0)) {|card, hash| hash[card.value[:value]] += 1}
+    puts @cards.each_with_object(Hash.new(0)) {|card, hash| hash[card.value] += 1}
   end
 
   private
