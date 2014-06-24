@@ -40,6 +40,14 @@ module Blackjack
 
     private
 
+      def next_card
+        card = @deck.next_card
+        @players.each do |player|
+          player.card_dealt card
+        end
+        card
+      end
+
       def bet!
         @players.each do |player|
           player.hands.each do |hand|
@@ -52,15 +60,23 @@ module Blackjack
         2.times do
           @players.each do |player|
             player.hands.each do |hand|
-              hand.deal_card @deck.next_card
+              hand.deal_card next_card
             end
           end
-          @dealer.deal_card @deck.next_card
+          @dealer.deal_card next_card
+        end
+      end
+
+      def shuffle
+        puts '>>SHUFFLE'
+        @deck.shuffle
+        @players.each do |player|
+          player.deck_shuffled(@number_of_decks)
         end
       end
 
       def prep_new_deal
-        @deck.shuffle if @rounds >= 6 || @number_of_decks == 1
+        shuffle if @deck.needs_shuffle?
         @rounds += 1
         @players.each do |player|
           player.clear_hands
@@ -87,7 +103,7 @@ module Blackjack
           puts "Dealer BLACKJACK!"
         else
           while @dealer.should_hit?
-            @dealer.deal_card @deck.next_card
+            @dealer.deal_card next_card
             puts @dealer.to_s(false)
           end
         end
@@ -136,7 +152,7 @@ module Blackjack
           case action
           when Blackjack::Actions::DOUBLE_DOWN
             hand.double_down!
-            hand.deal_card @deck.next_card
+            hand.deal_card next_card
             if hand.value > 21
               hand.set_state(Blackjack::States::BUSTED)
             else
@@ -145,14 +161,14 @@ module Blackjack
           when Blackjack::Actions::STAND
             hand.set_state(Blackjack::States::STANDING)
           when Blackjack::Actions::HIT
-            hand.deal_card @deck.next_card
+            hand.deal_card next_card
             hand.set_state(Blackjack::States::BUSTED) if hand.value > 21
           when Blackjack::Actions::SPLIT
             hand.split!
             puts hand.player.hands
             hand.player.hands.each do |split_hand|
               split_hand.set_state(Blackjack::States::SPLIT)
-              split_hand.deal_card @deck.next_card if split_hand.card_count == 1
+              split_hand.deal_card next_card if split_hand.card_count == 1
               split_hand.set_state(Blackjack::States::STANDING) if split_hand.split_aces?
             end
           else

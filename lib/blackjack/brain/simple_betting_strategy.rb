@@ -2,7 +2,7 @@ module Blackjack
   module Brain
     class SimpleBettingStrategy
 
-      def calculate_bet(last_hand_result)
+      def calculate_bet(data)
         10
       end
 

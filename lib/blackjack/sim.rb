@@ -1,6 +1,9 @@
 require "./lib/blackjack/game"
 
 require_relative "./brain/automatic_decision"
+require_relative "./brain/count_based_betting_strategy"
+require_relative "./brain/count_based_decision"
+require_relative "./brain/high_low_counting_strategy"
 require_relative "./brain/simple_decision"
 require_relative "./brain/simple_betting_strategy"
 require_relative "./brain/random_betting_strategy"
@@ -14,8 +17,8 @@ module Blackjack
       @game = Blackjack::Game.new(decks)
     end
 
-    def join(name, decision, betting)
-      player = Player.new(name, decision_strat(decision), betting_strat(betting))
+    def join(name, decision, betting, counting)
+      player = Player.new(name, decision_strat(decision), betting_strat(betting), counting_strat(counting))
       player.set_balance(1000)
       @game.join(player)
     end
@@ -31,6 +34,8 @@ module Blackjack
       case decision
         when :simple
           Blackjack::Brain::SimpleDecision.new
+        when :count
+          Blackjack::Brain::CountBasedDecision.new
         when :auto
           Blackjack::Brain::AutomaticDecision.new
         end
@@ -44,6 +49,15 @@ module Blackjack
           Blackjack::Brain::SimpleBettingStrategy.new
         when :random
           Blackjack::Brain::RandomBettingStrategy.new
+        when :count
+          Blackjack::Brain::CountBasedBettingStrategy.new
+        end
+    end
+
+    def counting_strat(counting)
+      case counting
+        when :highlow
+          Blackjack::Brain::HighLowCountingStrategy.new
         end
     end
 

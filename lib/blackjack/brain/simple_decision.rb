@@ -2,7 +2,7 @@ module Blackjack
   module Brain
     class SimpleDecision
 
-      def decide(actions, hand, showing)
+      def decide(actions, hand, showing, opts={})
         return actions.first if actions.length == 1
 
         if actions.include?(Blackjack::Actions::HIT)

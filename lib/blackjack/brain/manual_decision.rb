@@ -2,7 +2,7 @@ module Blackjack
   module Brain
     class ManualDecision
 
-      def decide(actions, player, showing)
+      def decide(actions, player, showing, opts={})
         actions.each_with_index do |action, index|
           puts "#{index}) #{action[:value]}"
         end

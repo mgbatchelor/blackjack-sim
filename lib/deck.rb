@@ -31,13 +31,14 @@ class Deck
   VALUES = [ Value::TWO, Value::THREE, Value::FOUR, Value::FIVE, Value::SIX, Value::SEVEN, Value::EIGHT,
              Value::NINE, Value::TEN, Value::JACK, Value::QUEEN, Value::KING, Value::ACE ]
 
-  def initialize(number_of_decks=1)
+  def initialize(number_of_decks)
     @number_of_decks = number_of_decks
-    build_deck
+    @needs_shuffle = true
   end
 
   def burn_card
     next_card
+    true
   end
 
   def next_card
@@ -45,9 +46,16 @@ class Deck
     @cards.shift
   end
 
+  def needs_shuffle?
+    if @needs_shuffle
+      @needs_shuffle = false
+      return true
+    end
+    @cards.count <= ((@number_of_decks * 52) / 2)
+  end
+
   def shuffle
-    build_deck
-    @cards = @cards.shuffle
+    @cards = build_deck.shuffle
   end
 
   def print_debug
@@ -58,15 +66,15 @@ class Deck
   private
 
     def build_deck
-      @cards = []
+      cards = []
       @number_of_decks.times do
         SUITS.each do |suit|
           VALUES.each do |value|
-            @cards << Card.new(suit, value[:value], value[:face_value])
+            cards << Card.new(suit, value[:value], value[:face_value])
           end
         end
       end
-      true
+      cards
     end
 
 end

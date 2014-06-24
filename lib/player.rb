@@ -5,19 +5,31 @@ class Player
   attr_reader :cards, :name, :stats, :balance, :hands
   attr_accessor :state
 
-  def initialize(name, brain, betting_strategy)
+  def initialize(name, brain, betting_strategy, counting_strategy)
     @name = name
     @brain = brain
     @betting_strategy = betting_strategy
+    @counting_strategy = counting_strategy
     @hands = []
     @stats = Hash.new() { |hash, key| hash[key] = Hash.new(0) }
     @balance = 0
-
     @last_hand_result = 0
   end
 
+  def card_burned
+    @counting_strategy.count_burn
+  end
+
+  def card_dealt(card)
+    @counting_strategy.count_card card
+  end
+
+  def deck_shuffled(number_of_decks)
+    @counting_strategy.reset(number_of_decks)
+  end
+
   def get_bet
-    bet = @betting_strategy.calculate_bet(@last_hand_result)
+    bet = @betting_strategy.calculate_bet({last_hand_result: @last_hand_result, true_count: @counting_strategy.true_count})
     @last_hand_result = 0
     puts "#{name} bet #{bet}"
     deduct(bet)
@@ -55,7 +67,7 @@ class Player
   end
 
   def choose_action(actions, hand, showing)
-    @brain.decide(actions, hand, showing)
+    @brain.decide(actions, hand, showing, { true_count: @counting_strategy.true_count })
   end
 
   def number_of_hands
@@ -67,7 +79,7 @@ class Player
   end
 
   def to_s
-    "#{balance} - #{name}"
+    "COUNT:#{@counting_strategy.true_count} #{balance} - #{name}"
   end
 
   def print_stats
